@@ -15,8 +15,8 @@ private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
     tertiary = Pink80,
-    background = Black1,
-    surface = Grey1
+    background = Pink80,
+    surface = Purple40
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -35,6 +35,8 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+
+// pre-generated when project is first made, checks if device is in dark mode or light mode, then applies the respective theme
 @Composable
 fun SketchpadTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

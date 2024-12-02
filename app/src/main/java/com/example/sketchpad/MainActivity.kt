@@ -16,32 +16,31 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.AbsoluteAlignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.sketchpad.ui.theme.SketchpadTheme
 import android.util.Log
-
-import com.example.sketchpad.CanvasView
-
+import androidx.compose.ui.Alignment
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.decorView.systemUiVisibility = (
+
+        window.decorView.systemUiVisibility = ( // Sets app in fullscreen and hides status bar and navigation menu bar
                 View.SYSTEM_UI_FLAG_FULLSCREEN or
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 )
-        enableEdgeToEdge()
-        setContent {
 
-            SketchpadTheme {
+        enableEdgeToEdge() // fills up whole screen, including the space the status and navigation bar would take up
+
+        setContent {
+            SketchpadTheme { // Applies theme set in Theme.kt to contents
                 MainUI()
             }
-
-
         }
     }
 }
@@ -49,41 +48,40 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainUI() {
     val context = LocalContext.current
-    val canvasView = remember {CanvasView(context)}
-    Box(
+    val canvasView = remember {CanvasView(context)} // Creates a CanvasView object, passes context UI can interact with it
+    Box( // makes box to contain all the UI elements
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
 
-        AndroidView(
+        AndroidView( // makes view for the CanvasView object
             factory = {canvasView},
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .wrapContentSize()
+                .background(Color.White)
+                .align(Alignment.Center)
+
         )
-        Row(
+
+        Row( // Sets row to contain buttons at top of screen
             modifier = Modifier
                 .wrapContentSize()
                 .background(MaterialTheme.colorScheme.surface)
         ) {
             Button(onClick = {
-                canvasView.toggleEraser()
-                Log.d("Button", "Button Pressed")
+                canvasView.setToEraser() // Turns on Eraser
             } ) {
                 Text("Eraser")
             }
-            Button(onClick = { test() }) {
-                Text("Button")
-
-            }
-            Button(onClick = { test() }) {
-                Text("Button")
-
-            }
-            Button(onClick = { test() }) {
-                Text("Button")
-
+            Button(onClick = {
+                canvasView.setToBrush() // Turns on Paint brush
+            } ) {
+                Text("Brush")
             }
         }
+
+        // Column element for sidebar buttons in the future
 //        Column(
 //            modifier = Modifier
 //                .wrapContentSize()
@@ -108,11 +106,4 @@ fun MainUI() {
 //            }
 //        }
     }
-
-}
-
-
-
-fun test () {
-    println("")
 }

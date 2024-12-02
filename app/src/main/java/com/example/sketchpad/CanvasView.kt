@@ -2,140 +2,99 @@ package com.example.sketchpad
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BlendMode
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.BlendMode
 import android.graphics.Path
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
+
 import android.view.MotionEvent
 import android.view.View
-import android.util.Log
-import androidx.core.graphics.setBlendMode
+
 
 class CanvasView(context: Context) : View(context) {
-    private lateinit var canvas: Canvas
-    private lateinit var bitmap: Bitmap
-    private var lastX: Float = 0.0f
-    private var lastY: Float = 0.0f
-    private var tap: Boolean = false
-    private val path = Path()
-    private var eraserOn: Boolean = false
-
-
-    private val paintBrush = Paint().apply {
+    private val paintBrush = Paint().apply { // Creates Paint object and sets its properties
         color = Color.BLACK
-        strokeWidth = 50f
+        isAntiAlias = true
+        isDither = true
         style = Paint.Style.STROKE
+        strokeJoin = Paint.Join.ROUND
         strokeCap = Paint.Cap.ROUND
+        strokeWidth = 10f
+    }
+
+    private val eraserBrush = Paint().apply { // Create eraser Paint opbject
+        isAntiAlias = true
+        isDither = true
+        style = Paint.Style.STROKE
+        strokeJoin = Paint.Join.ROUND
+        strokeCap = Paint.Cap.ROUND
+        strokeWidth = 10f
         blendMode = BlendMode.CLEAR
     }
+    private lateinit var drawCanvas: Canvas
+    private lateinit var canvasBitmap: Bitmap
 
+    private var currentPaint = paintBrush // Tracks which brush is active
+
+    private val paths = mutableListOf<Pair<Path, Paint>>() // List of all the paths, meaning the path of the stroke and the paintbrush that was used
+    private var currentPath: Path? = null // currentPath can hold a path object or be null when there is no path being actively made
 
     init {
-        val screenWidth = context.resources.displayMetrics.widthPixels
-        val screenHeight = context.resources.displayMetrics.heightPixels
-
-        bitmap = Bitmap.createBitmap(
-            screenWidth - 50,
-            screenHeight - 100,
-            Bitmap.Config.ARGB_8888
-        )
-
-        canvas = Canvas(bitmap)
-        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC)
-
-
+        setLayerType(LAYER_TYPE_SOFTWARE, null) // Enables layer to use software acceleration, needed for eraser functionality
     }
 
-    override fun onDraw(canvas: Canvas) {
+    override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) { // Runs when changes are detected in view size or screen orientation
+        super.onSizeChanged(width, height, oldWidth, oldHeight)
+
+        canvasBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888) // sets canvas size to the size of the screen, and sets the pixels to hold 32 bit data (RGBA)
+        drawCanvas = Canvas(canvasBitmap)
+    }
+
+    override fun onDraw(canvas: Canvas) { // adds the drawing to the view
         super.onDraw(canvas)
-        canvas.drawBitmap(bitmap, 0f, 0f, null)
-        canvas.drawPath(path, paintBrush)
 
-//
-    }
+        canvas.drawBitmap(canvasBitmap, 0f, 0f, null)
 
-    override fun onTouchEvent(event: MotionEvent): Boolean { // provided by View class, runs when the contact between the finger and screen change
-
-        if (eraserOn) {
-            paintBrush.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR) // Eraser mode
-            Log.d("EraserFunction", "ERASER ON")
-        } else {
-            paintBrush.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER) // Drawing mode
-            Log.d("EraserFunction", "ERASER OFF")
+        for ((path, paint) in paths) { // draws all the saved paths onto the canvas
+            canvas.drawPath(path, paint) // takes the paint object, applies it to path object
         }
 
-
-
-
-
-//        if (eraserOn == true) {
-//            paintBrush.setBlendMode(BlendMode.CLEAR)
-//            Log.d("EraserFunction", "ERASER ON")
-//            currentMode = PorterDuff.Mode.CLEAR
-//            Log.d("Brush Mode", "Current Brush Mode: $currentMode")
-//        } else if (eraserOn == false) {
-//            paintBrush.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)
-//            Log.d("EraserFunction", "ERASER OFF")
-//            paintBrush.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)
-//            currentMode = PorterDuff.Mode.SRC_OVER
-//            Log.d("Brush Mode", "Current Brush Mode: $currentMode")
-//        }
-
-        Log.d("Eraser Bool", eraserOn.toString())
-        val screenXCordinate = event.x
-        val screenYCordinate = event.y
-
-        when (event.getActionMasked()) {
-            MotionEvent.ACTION_DOWN -> {
-                path.moveTo(
-                    screenXCordinate,
-                    screenYCordinate
-                ) // stores the coordinates of the initial touch to be used later
-                lastX = screenXCordinate
-                lastY = screenYCordinate
-            }
-
-            MotionEvent.ACTION_POINTER_DOWN -> { // when additional fingers are placed
-                tap =
-                    false // tap is used to detect when the user whats to simply tap a dot. If more than one finger is detected, that tap event does not occur
-            }
-
-            MotionEvent.ACTION_MOVE -> { // whenever the finger is dragged across the screen
-                if (event.pointerCount < 1 && tap) { // when only one finger is detected and tap is true
-
-                } else {
-                    val midX = (lastX + screenXCordinate) / 2
-                    val midY = (lastY + screenYCordinate) / 2
-                    path.quadTo(lastX, lastY, midX, midY)
-                    lastX = screenXCordinate
-                    lastY = screenYCordinate
-                    invalidate()
-                }
-            }
-
-
+        currentPath?.let { path -> // if there is a ongoing path, it draws that too
+            canvas.drawPath(path, currentPaint)
         }
-        return true
-    }
-
-    fun toggleEraser() {
-        Log.d("EraserFunction", "Function Called")
-        if (eraserOn == true) {
-            eraserOn = false
-//            Log.d("EraserFunction", "SET TO FALSE")
-//            Log.d("Eraser Bool", eraserOn.toString())
-        } else if (eraserOn == false) {
-            eraserOn = true
-//            Log.d("EraserFunction", "SET TO TRUE")
-//            Log.d("Eraser Bool", eraserOn.toString())
-        }
-
-
 
     }
 
+    override fun onTouchEvent(event: MotionEvent): Boolean { // runs when changes in contact is detected on screen
+
+        val touchX = event.x // gets x and y cordinate of touch
+        val touchY = event.y
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> { // when finger first touches the screen
+                currentPath = Path().apply { moveTo(touchX, touchY) } // starts new path
+                paths.add(currentPath!! to Paint(currentPaint)) // adds the currentPath and paintbrush pair to list, !! prevents error if it is null,
+            }
+
+            MotionEvent.ACTION_MOVE -> { // when the finger is dragged across the screen
+                currentPath?.lineTo(touchX, touchY) // adds more to that path object as it moves to new x and y coordinates
+            }
+
+            MotionEvent.ACTION_UP -> { // when finger is lifted from screen
+                currentPath = null // resets currentPath to prepare for next path object to be made
+            }
+        }
+        invalidate() // updates the view
+        return true // tells function that touch event was handled
+    }
+
+
+    fun setToBrush() {
+        currentPaint = paintBrush // changes brush to painting paint object
+    }
+
+    fun setToEraser() {
+        currentPaint = eraserBrush // changes brush to eraser paint object
+    }
 }
-
