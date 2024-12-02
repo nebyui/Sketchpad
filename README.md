@@ -1,33 +1,29 @@
 # Overview
 
-{Important! Do not say in this section that this is college assignment. Talk about what you are trying to accomplish as a software engineer to further your learning.}
+This program is a simple painting app for Android written in Kotlin. It has a brush and eraser functionality.
 
-{Provide a description of the software that you wrote to demonstrate the Kotlin language.}
-
-{Describe your purpose for writing this software.}
-
-{Provide a link to your YouTube demonstration. It should be a 4-5 minute demo of the software running and a walkthrough of the code. Focus should be on sharing what you learned about the language syntax.}
+The purpose of the project was to become familiar with making a paint app in Kotlin. I've made paint apps in Java, but Kotlin is more optimal for Android. I want to eventually make and release a professional level art app that is free and has no ads. There are not many good options for Android, as they either cost money, lock basic features behind a premium subscription, or stuffed with ads. This app is very far from that point, but it is a start. 
 
 [Software Demo Video](http://youtube.link.goes.here)
 
 # Development Environment
 
-{Describe the tools that you used to develop the software}
+Made in Android Studio
 
-{Describe the programming language that you used and any libraries.}
+Written in Kotlin
+
+Uses Jetpack Compose library for UI creation and formatting
+
+Uses Android Graphics Library for painting functionality and rendering
 
 # Useful Websites
 
-{Make a list of websites that you found helpful in this project}
 
 - [YouTube: Kotlin App Tutorial](https://www.youtube.com/playlist?list=PLt72zDbwBnAX60sv1sKuAS3TkenDj2F2I)
-- [YouTube: Jetpack Compose Drawing Basics](https://www.youtube.com/watch?v=xdebBD47wTY)
 - [ChatGPT](https://chatgpt.com)
 
 # Future Work
 
-{Make a list of things that you need to fix, improve, and add in the future.}
-
-- Item 1
-- Item 2
-- Item 3
+- Adding color picker
+- Improving UI
+- Adding layer functionality
